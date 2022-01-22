@@ -35,6 +35,7 @@ target
 # js #
 node_modules
 /build
+/dist
 
 # local env files
 .env.local
