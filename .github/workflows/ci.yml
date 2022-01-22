@@ -6,14 +6,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        persist-credentials: false
+        ref: master
 
     - name: Install and Build
-      uses: JamesIves/github-pages-deploy-action@releases/v3
+      uses: JamesIves/github-pages-deploy-action@v3
       run: |
         npm install
         npm run build
