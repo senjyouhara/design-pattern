@@ -1,0 +1,302 @@
+零、基本规则
+
+一个括号是一个积木，括号内第一个是积木名称 其他是积木参数
+
+一：常量积木定义：  
+1、Color 表示红方绿方
+RED=1    红方
+GREEN=2  绿方
+BOTH=3  两个都
+ANY=4   任何一个
+SELF=5  自己
+OPPO=6  对手
+
+2、SquareOrCross 表示棋子在格内或交叉线上
+SQURE=1
+CROSS=2
+
+3、Dirs 方向组合
+DIRS_HV  水平、垂直
+DIRS_HVD 水平、垂直、双对角
+DIRS_HVD1  水平、垂直、奇数位置上双对角
+DIRS_HVD2  水平、垂直、偶数位置上双对角
+DIRS_HVD3  水平、垂直、斜线（单对角）
+DIRS_HVD4  水平、垂直、反斜线（单对角）
+
+4、Animation 动画
+ANIM_FIREWORK=1
+ANIM_RAIN=2
+ANIM_DRAW=3
+
+5、Tone 默认提示音
+TONE_WIN=1
+TONE_LOSE=2
+TONE_DRAW=3
+
+二：内置变量积木定义：
+
+red_eat_count   红方吃子统计
+green_eat_count  绿方吃子统计
+red_chess_count  红方棋子当前个数
+green_chess_count  绿方棋当前子个数
+
+三：比较积木
+
+(ge num1 num2)
+(gt num1 num2)
+(le num1 num2)
+(lt num1 num2)
+(eq num1 num2)
+
+四：积木定义：
+
+1. 阶段积木
+(stage_init)   初始设置
+(stage_layout)   布子阶段 
+(stage_move)   走子阶段 
+(stage_end)    结束阶段
+(game_end)    游戏结束
+
+2. 棋盘配置相关
+
+(players Num)  玩家个数 Num取值1或2
+
+(board SquareOrCross SideSize) 棋盘设置  SquareOrCross-表示是否交叉线，取值SQURE或CROSS； SideSize表示棋盘边大小，取值3、4、5
+
+(initplace Color ...) 初始固定布子 abcde表示列 12345表示行
+    
+例子：	
+(initplace RED a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 a3 b3) 
+(initplace GREEN d3 e3 a4 b4 c4 d4 e4 a5 b5 c5 d5 e5) 
+
+
+3.其他
+(play_turn Color Color)      下子顺序   (play_turn RED GREEN)
+(pre_play_times Color Num)  预先走n步
+
+
+五、动作积木   布子规则或走子规则 
+
+1. 动作类型积木  第一个参数取值RED/GREEN/BOTH表示对红或绿或双方生效
+(act_put2empty Color)            空位置上布子
+(act_put2empty_withflip Color)   空位置上且必须有翻转才可布子
+
+(act_nbrmove Color)           沿线单步移动
+(act_xstepmove Color Num)     沿线多步移动，可以拐弯，类似蒸架棋
+(act_flymove Color)           沿直线走任意步，类似五子飞棋
+(act_mjump Color Color)  多步跳走   第二个参数表示被跳的棋子颜色限制，取值OPPO/SELF/BOTH表示对手颜色/自己颜色/两种都可以
+(act_sjump Color Color)  单步跳走   第二个参数表示被跳的棋子颜色限制，取值OPPO/SELF/BOTH表示对手颜色/自己颜色/两种都可以
+
+2.  动作列表积木
+(actions  ...)   参数个数不定，至少一个 
+
+3. 动作限制积木   第一个参数取值RED/GREEN/BOTH表示对红或绿或双方生效
+(limit_dir Color Dirs)   方向限制，  例子(limit_dir BOTH DIRS_HVD1) 
+(limit_eatfirst Color)   有吃必吃   
+(limit_nobackoff Color)  不可后退
+(limit_norepeat Color)   不可重复
+
+4. 动作限制列表积木
+(action_limits  ...)  参数个数不定，至少一个 
+
+
+六、吃子方式或翻转方式积木
+
+1. 第一个参数取值RED/GREEN/BOTH表示对红或绿或双方生效
+(flip_embrace Color Dirs)     黑白棋方式  (flip_embrace BOTH DIRS_HVD)
+(flip_nbr Color Dirs)         翻田棋方式  (flip_nbr BOTH DIRS_HV)
+(flip_side Color Dirs)        策反棋方式        
+
+(eat_jump Color)              跳吃
+(eat_1tiao2 Color)     挑吃，1个棋子在两个棋子中间，1吃2
+(eat_2jia1  Color)     夹吃，2个棋子中间夹1个棋子，2吃1
+(eat_2nbr1 Color)      走四棋、六子冲棋方式
+
+
+2. 吃子或翻转方式列表积木
+(eatorflip ...)
+
+例子：
+(eatorflip (eat_jump BOTH))
+(eatorflip (flip_embrace BOTH DIRS_HVD))
+(eatorflip (flip_nbr BOTH DIRS_HV))
+
+七、结束条件积木  用于判断结束等情况
+
+(cond_noplace Color)        无子可下（包含被吃光情况）  参数Color取值 RED-红方是否无子可下 GREEN-绿方是否无子可下 BOTH-是否双方都无子可下 ANY-是否存在任意一方无子可下  
+(cond_line_shape Color Dirs Num) 成线的有效棋形  参数 Color一步取值ANY，Dirs表示需要判断那几个方向，Num-成线的棋子个数
+(cond_chess_count_eq Color Num)  当前棋子数目等于Num
+(cond_eat_count_ge Color Num)    吃子数目大等于Num
+
+八、胜利积木
+
+1、胜利积木
+(win_line_shape DIRS_HVD 3)
+(win_comp_chess_count)   比较剩余棋子数目，多得胜利
+(win_eat_count_ge Num)   计算吃子数目大于Num的胜利
+(win_oppo_noplace)    对手无子可下则胜利
+
+2、胜利列表积木
+
+(red_win_rules ...)      红方胜利规则
+(green_win_rules ...)    绿方胜利规则
+(win_rules ...)          胜利规则，双方胜利规则一样时可使用这个
+
+双方获胜规则一样时可以使用第三个，否则必现使用第一和第二
+
+九、配置例子
+
+1、井字棋
+    (game "tictactoe"  "v0.1")  # game不做积木  名字有用户取一个，长度限制最大不超过15。版本自动填当前支持的最新协议版本。
+    (players 2)
+	
+    (stage_init)
+	(board SQURE 3)
+
+	(stage_layout)
+	(play_turn RED GREEN)
+	(actions  (act_put2empty BOTH)) 
+	(stage_end (cond_noplace ANY) (cond_line_shape ANY DIRS_HVD 3))  #  无子可下 或 有效棋形
+
+    (game_end)
+	(win_rules (win_line_shape DIRS_HVD 3))   # 胜利条件
+	
+	(anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+	
+2、奥雀雀棋    十二子跳棋
+    (game "aoqueque"  "v0.1")  
+    (players 2)
+	
+    (stage_init)
+	(board CROSS 5)
+	(initplace RED a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 a3 b3) 
+	(initplace GREEN d3 e3 a4 b4 c4 d4 e4 a5 b5 c5 d5 e5) 
+
+	(stage_move)
+	(play_turn RED GREEN)
+	(actions  (act_nbrmove BOTH) (act_mjump BOTH OPPO)) 
+	(action_limits  (limit_dir BOTH DIRS_HVD1) (limit_eatfirst BOTH) (limit_nobackoff BOTH) (limit_repeat BOTH)) 
+	(eatorflip (eat_jump BOTH))
+	(stage_end (cond_noplace ANY))
+
+    (game_end)
+	(win_rules (win_comp_chess_count))
+	
+    (anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+	
+
+3、小枪大炮棋
+	
+	
+	(game "gun_cannon"  "v0.1")  
+    (players 2)
+	
+    (stage_init)
+	(board CROSS 5)
+	(initplace RED b5 c5 d5) 
+	(initplace GREEN a1 b1 c1 d1 e1 a2 b2 c2 d2 e2 a3 b3 c3 d3 e3) 
+	
+	(stage_move)
+	(play_turn RED GREEN)
+	(pre_play_times RED 3)  # 红色预先走三步，然后绿色
+	(actions (act_nbrmove BOTH) (act_sjump RED OPPO)) 
+	(action_limits  (limit_dir BOTH DIRS_HV)) 
+	(eatorflip (eat_jump RED))
+	(stage_end (cond_noplace RED) (cond_eat_count_ge RED 8))  #红方无子可下 或 红方吃子大等于8颗
+
+    (game_end)
+	(red_win_rules (win_eat_count_ge 8))
+	(green_win_rules (win_oppo_noplace))
+
+    (anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+
+
+4、黑白棋  （翻转方式  水平垂直对角线上被括在中间的棋子翻转）
+		
+	(game "othello"  "v0.1")  
+    (players 2)
+	
+    (stage_init)
+	(board SQUARE 5)
+	(initplace RED   c2 d3) 
+	(initplace GREEN d2 c3) 
+
+	(stage_layout)
+	(play_turn RED GREEN)
+	(actions  (act_put2empty_withflip BOTH)) 
+	(eatorflip (flip_embrace BOTH DIRS_HVD))
+	(stage_end (cond_noplace BOTH))  # 双方都无子可下
+	
+    (game_end)
+	(red_win_rules (win_comp_chess_count))
+	(green_win_rules (win_comp_chess_count))
+
+    (anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+	
+5、翻田棋  （翻转方式  水平垂直相邻的棋子翻转）
+		
+	(game "fantian"  "v0.1")  
+    (players 2)
+	
+    (stage_init)
+	(board SQUARE 3)
+	(initplace RED   a1 b1 c1) 
+	(initplace GREEN a3 b3 c3) 
+
+	(stage_move)
+	(play_turn RED GREEN)
+	(actions (act_nbrmove BOTH) (act_sjump BOTH BOTH)) 
+	(action_limits  (limit_dir BOTH DIRS_HV)) 
+	(eatorflip (flip_nbr BOTH DIRS_HV))
+	(stage_end (cond_noplace ANY))  #任何一方无子可下
+	
+    (game_end)
+	(red_win_rules (win_comp_chess_count))
+	(green_win_rules (win_comp_chess_count))
+
+    (anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+	
+	
+6、  四子棋  （先布子 再走子  布子阶段可能已经出现胜负）	
+
+    (game "fourchess"  "v0.1") 
+	(players 2)
+	
+    (stage_init)
+	(board CROSS 4)
+
+	(stage_layout)
+	(play_turn RED GREEN)
+	(actions  (act_put2empty BOTH)) 
+	(stage_end (cond_chess_count_eq BOTH 4) (cond_line_shape ANY DIRS_HVD 4))
+	
+	(stage_move)
+	(play_turn RED GREEN)
+	(actions  (act_nbrmove BOTH)) 
+	(action_limits  (limit_dir BOTH DIRS_HV)) 
+	(stage_end (cond_line_shape ANY DIRS_HVD 4))
+
+    (game_end)
+	(red_win_rules (win_line_shape DIRS_HVD 4))
+	(green_win_rules (win_line_shape DIRS_HVD 4))
+	
+	(anim_tone)
+	(anim_tone_win ANIM_FIREWORK TONE_WIN)
+	(anim_tone_lose ANIM_RAIN TONE_LOSE)
+	(anim_tone_draw ANIM_DRAW TONE_DRAW)
+
