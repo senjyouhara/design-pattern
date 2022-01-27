@@ -2,9 +2,9 @@ const fs = require("fs")
 const path = require("path")
 
 module.exports = {
-	title: '设计模式',
-	description: '设计模式',
-	base: process.env.NODE_ENV === 'production' ?'/design-patterns/' : '/',
+	title: 'JAVA设计模式',
+	description: 'JAVA设计模式',
+	base: process.env.NODE_ENV === 'production' ?'/design-pattern/' : '/',
 	dest: "dist",
 	markdown: {
 		lineNumbers: true,
@@ -12,7 +12,7 @@ module.exports = {
 	themeConfig: {
 		nav: [
 			{text: '首页', link: '/'},
-			{text: 'github', link: 'https://github.com/senjyouhara/design-patterns'},
+			{text: 'github', link: 'https://github.com/senjyouhara/design-pattern'},
 		],
 	},
 	plugins: {
